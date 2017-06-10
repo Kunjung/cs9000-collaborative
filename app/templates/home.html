@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+	
+
+	<ul class="list-group list-inline ">
+	{% for movie in movies %}
+		<li class="list-group-item">
+			<p>{{ movie.name.capitalize() }}</p>
+			<img src="static/images/{{ movie.name }}.jpg"/>
+		</li>
+		
+	{% endfor %}
+	</ul>
+
+{% endblock %}

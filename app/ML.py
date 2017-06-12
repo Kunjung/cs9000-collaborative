@@ -12,3 +12,8 @@ def get_all_users():
 
 def get_all_movies():
 	return Movie.query.all()
+
+def predict_movies_for_user(userA, users, movies):
+	### TO DO
+	### returns a list of movies arranged in descending order based on minimum distance
+	return Movie.query.limit(50)

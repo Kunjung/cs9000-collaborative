@@ -9,7 +9,7 @@ from app import app, db, login_manager
 from .models import *
 
 ## Machine Learning 
-from .movie_ai import *
+from .ML import *
 import heapq
 
 COUNTER = 0
@@ -43,7 +43,7 @@ class RatingForm(FlaskForm):
 
 @app.route('/')
 def home():
-	movies = Movie.query.limit(20)
+	movies = Movie.query.limit(50)
 	return render_template('home.html', movies=movies)
 
 
@@ -70,7 +70,7 @@ def signup():
 		db.session.add(new_user)
 		db.session.commit()
 		login_user(new_user, remember=True)
-		return redirect(url_for('setpreferences'))
+		return redirect(url_for('dashboard'))
 
 	return render_template('signup.html', form=form)
 
@@ -78,38 +78,18 @@ def signup():
 def secret():
 	return render_template('secret.html')
 	
-@app.route('/setpreferences', methods=['POST', 'GET'])
-@login_required
-def setpreferences():
-	form = PreferenceForm()
-	if form.validate_on_submit():
-		user_id = current_user.id
-		
-		comedy = int(form.comedy.data) / 10.
-		action = int(form.action.data) / 10.
-		romance = int(form.romance.data) / 10.
-		scifi = int(form.scifi.data) / 10.
-		prefer = Preference(user_id=user_id, comedy=comedy, action=action, romance=romance, scifi=scifi)
-		db.session.add(prefer)
-		db.session.commit()
-		return redirect(url_for('dashboard'))
-	preference = Preference.query.filter_by(user_id = current_user.id).first()
-	return render_template('setpreferences.html', preference = preference, form=form)
-
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-	### Get the BEST 10 predicted rated movies
-	movies = []
-	for movie in Movie.query.all():
-		predicted_rating = calculate_predicted_rating(current_user, movie)
-		mr = (movie, predicted_rating)
-		movies.append(mr)
+	### The collaborative filter will work each time here to get the movie
+	### to recommend to the user
+	users = get_all_users()
+	movies = get_all_movies()
 	
-	movies = heapq.nlargest(10, movies, lambda mr: mr[1])
-
-	return render_template('dashboard.html', username=current_user.username, movies=movies)
+	recommended_movies = predict_movies_for_user(current_user, users, movies)
+	
+	return render_template('dashboard.html', username=current_user.username, recommended_movies=recommended_movies)
 
 
 @app.route('/rate/<int:movie_id>', methods=['GET', 'POST'])
@@ -126,15 +106,6 @@ def rate(movie_id):
 		query = ratings.insert().values(user_id=user_id, movie_id=movie_id, rating=rating)
 		db.session.execute(query)
 		db.session.commit()
-
-		COUNTER = COUNTER + 1
-		### Perform Machine Learning if 10 ratings have been made
-		if COUNTER % NO_OF_RATINGS_TO_TRIGGER_ALGORITHM == 0:
-			total_error = calculate_total_error()
-			update_all_user_preferences()
-
-			return '<h1>Machine Learning %s with error %s</h1>' % (str(COUNTER % 10), str(total_error)) 
-
 		return redirect(url_for('dashboard'))
 
 	movie = Movie.query.get(movie_id)

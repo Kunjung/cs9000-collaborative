@@ -16,6 +16,7 @@ COUNTER = 0
 
 NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 5
 
+
 @login_manager.user_loader
 def load_user(user_id):
 	return User.query.get(int(user_id))

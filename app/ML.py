@@ -14,7 +14,7 @@ def get_all_movies():
 	return Movie.query.all()
 
 # Returns a distance-based similarity score for person1 and person2
-def sim_distance(user1, user2):
+def similarity_distance(user1, user2):
 	# Get the list of shared_movies
 	si={}
 
@@ -37,7 +37,7 @@ def sim_distance(user1, user2):
 		diff = user1_rating - user2_rating
 		sum_of_squares = sum_of_squares + diff * diff
 					
-return 1/(1+sum_of_squares)
+	return 1/(1+sum_of_squares)
 
 
 
@@ -71,11 +71,11 @@ def predict_movies_for_user(user, users, n=20):
 		# Create the normalized list
 	rankings=[(total/simSums[movie.id], movie_id) for movie_id, total in totals.items()]
 
-# Return the sorted list
-rankings.sort()
-rankings.reverse()
-return rankings[:n]
-
+	# Return the sorted list
+	rankings.sort()
+	rankings.reverse()
+	movies = [Movie.query.get(id) for ranking, id in rankings]
+	return movies[:n]
 
 
 

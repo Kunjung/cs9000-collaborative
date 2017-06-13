@@ -16,7 +16,6 @@ COUNTER = 0
 
 NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 5
 
-
 @login_manager.user_loader
 def load_user(user_id):
 	return User.query.get(int(user_id))
@@ -85,10 +84,11 @@ def secret():
 def dashboard():
 	### The collaborative filter will work each time here to get the movie
 	### to recommend to the user
-	users = get_all_users()
-	movies = get_all_movies()
+	#users = get_all_users()
+	users = AncientUser.query.limit(5)
+	#movies = get_all_movies()
 	
-	recommended_movies = predict_movies_for_user(current_user, users, movies)
+	recommended_movies = predict_movies_for_user(current_user, users, n=20)
 	
 	return render_template('dashboard.html', username=current_user.username, recommended_movies=recommended_movies)
 

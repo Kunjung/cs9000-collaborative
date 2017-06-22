@@ -82,7 +82,7 @@ def dashboard():
 	### to recommend to the user
 	#users = get_all_users()
 	#movies = get_all_movies()
-	NUM_USER = 150
+	NUM_USER = 5
 	users = AncientUser.query.limit(NUM_USER)
 	t1 = time.time()
 	

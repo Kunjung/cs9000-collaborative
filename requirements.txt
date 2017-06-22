@@ -6,5 +6,3 @@ Flask-SQLAlchemy==2.1
 Flask-Bootstrap
 Flask-Login
 Flask-WTF
-pandas
-gunicorn==19.1.1

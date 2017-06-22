@@ -5,3 +5,4 @@ Flask-SQLAlchemy
 Flask-Bootstrap
 Flask-Login
 Flask-WTF
+WTForms==2.1

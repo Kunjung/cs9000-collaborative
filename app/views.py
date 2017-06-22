@@ -12,10 +12,6 @@ from .models import *
 from .ML import *
 import heapq
 
-COUNTER = 0
-
-NO_OF_RATINGS_TO_TRIGGER_ALGORITHM = 5
-
 @login_manager.user_loader
 def load_user(user_id):
 	return User.query.get(int(user_id))
@@ -78,19 +74,23 @@ def signup():
 def secret():
 	return render_template('secret.html')
 	
-
+import time
 @app.route('/dashboard')
 @login_required
 def dashboard():
 	### The collaborative filter will work each time here to get the movie
 	### to recommend to the user
 	#users = get_all_users()
-	users = AncientUser.query.limit(5)
 	#movies = get_all_movies()
+	NUM_USER = 150
+	users = AncientUser.query.limit(NUM_USER)
+	t1 = time.time()
 	
-	recommended_movies = predict_movies_for_user(current_user, users, n=20)
+	recommended_movies = predict_movies_for_user(current_user, users)
 	
-	return render_template('dashboard.html', username=current_user.username, recommended_movies=recommended_movies)
+	t2 = time.time()
+
+	return render_template('dashboard.html', username=current_user.username, recommended_movies=recommended_movies, time=t2-t1)
 
 
 @app.route('/rate/<int:movie_id>', methods=['GET', 'POST'])
@@ -104,6 +104,10 @@ def rate(movie_id):
 	if form.validate_on_submit():
 		rating = int(form.rating.data)
 		# update the ratings table and add the rating
+		if rating > 5:
+			rating = 5
+		elif rating < 0:
+			rating = 0
 		query = ratings.insert().values(user_id=user_id, movie_id=movie_id, rating=rating)
 		db.session.execute(query)
 		db.session.commit()
